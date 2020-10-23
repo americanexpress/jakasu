@@ -1,0 +1,64 @@
+jakasu:
+  subs:
+    test:
+      classname: com.americanexpress.jakasu.subscriber.setup.TestSubscriber
+      topic:
+        name: "input-topic"
+      groupid: "consumer-group"
+      bootstrap-servers: "servers"
+
+    test2:
+      classname: com.americanexpress.jakasu.subscriber.setup.TestSubscriber
+      groupid: "consumer-group2"
+      bootstrap-servers: "servers"
+      topic:
+        name: "input-topic2"
+        session-timeout: 30000
+        request-timeout: 30000
+        max-poll-records: 1
+        retry: 3
+        backoff-period: 20
+        reset-config: "earliest"
+      filter:
+        keys: source-type,event-type
+        values: (source1,event1),(source2,event2)
+
+    testStreams:
+      topic:
+        name: "input-topic"
+      groupid: "streams-consumer-group"
+      bootstrap-servers: "servers"
+      streams:
+        enable: true
+        processor: com.americanexpress.jakasu.subscriber.setup.TestProcessor
+        output-topic-name: "output-topic"
+        thread-count: 1
+        poll-ms: 150
+        process-guarantee: exactly_once
+        topology-optimize: all
+        buffer-records-per-partition: 500
+        max-bytes-buffered: 1000000
+        dedup:
+          enable: true
+          id-header: "source-uniqueid"
+          window-size: 7
+          replication: 1
+        flatmap:
+          enable: true
+          id-header: "id"
+      filter:
+        keys: id,location
+        values: (id1,location1),(id2,location2)
+
+    testStreams2:
+      topic:
+        name: "input-topic"
+      groupid: "streams-consumer-group"
+      bootstrap-servers: "servers"
+      streams:
+        enable: true
+        processor: com.americanexpress.jakasu.subscriber.setup.TestProcessor
+        output-topic-name: "output-topic"
+
+  security:
+    enabled: false

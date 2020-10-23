@@ -1,0 +1,78 @@
+server:
+  servlet:
+    contextPath: /jakasustreams
+  port: 8081
+
+logging:
+  level:
+    root: INFO
+
+jakasu:
+  subs:
+    # streaming kafka subscriber #1
+    streams-ex1:
+      # input topic names for reading msgs as kafka streams
+      topic:
+        name: "Input-Topic"
+        session-timeout: 30030
+        request-timeout: 30030
+        retry: 4
+        backoff-period: 22
+        max-poll-records: 2
+        reset-config: "earliest"
+      groupid: "your-groupid"
+      bootstrap-servers: yourhost:port
+      filter:
+        keys: source-type,event-type
+        values: (stype1,etype1),(stype2,etype2)
+      streams:
+        enable: true
+        flatmap:
+          enable: true
+          id-header: "source-uniqueid"
+        thread-count: 2
+        processor: com.americanexpress.jakasu.streams.examples.ProcessorImpl
+        # output topic names for writing msgs as kafka streams
+        output-topic-name: "Output-Topic"
+        poll-ms: 200
+        process-guarantee: exactly_once
+        topology-optimize: all
+        buffer-records-per-partition: 478
+        max-bytes-buffered: 200000
+        dedup:
+          enable: true
+          id-header: "source-uniqueid"
+          window-size: 7
+          replication: 1
+
+    # streaming kafka subscriber #2 - bare minimum config to run a kstreams sub
+    streams-ex2:
+      topic:
+        name: "Another-Input-Topic-1"
+      groupid: "your-groupid"
+      bootstrap-servers: yourhost:port
+      streams:
+        enable: true
+        processor: com.americanexpress.jakasu.streams.examples.impl.ProcessorImpl
+        output-topic-name: "Input-Topic"
+      filter:
+        custom-classname: com.americanexpress.jakasu.streams.examples.ExampleCustomFilter
+
+  security:
+    enabled: true
+    protocol: SSL
+    ssl:
+      protocol: TLSv1.2
+      keystore:
+        type: JKS
+        location: jakasu-streams-examples/src/main/cert/appkeystore.jks
+        password: ENC(your-encrypted-appkeystore-password)
+      key:
+        password: ENC(your-encrypted-appkeystore-password)
+      truststore:
+        location: jakasu-streams-examples/src/main/cert/kafka-client-yourtruststore.jks
+        password: ENC(your-encrypted-client-keystore-store-password)
+
+jasypt: #jasypt include for secrets encryption
+  encryptor:
+    password: ${symmetric_cipher_key}

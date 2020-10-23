@@ -1,0 +1,62 @@
+server:
+  servlet:
+    contextPath: /jakasusubscriber
+
+logging:
+  level:
+    root: INFO
+
+jakasu:
+  subs:
+    example1:
+      classname: com.americanexpress.jakasu.subscriber.examples.subscriber.TestSubscriber
+      groupid: "Jakasu_Test_01"
+      bootstrap-servers: yourhost:port
+      topic:
+        name: "Input-Topic"
+        # OPTIONAL CONFIG:
+        session-timeout: 30030
+        request-timeout: 30030
+        max-poll-records: 2
+        retry: 4
+        backoff-period: 22
+        reset-config: "earliest"
+      filter:
+        keys: source-type,event-type
+        values: (stype1,etype1),(stype2,etype2)
+
+    ##
+    #    example2:
+    #      classname: com.americanexpress.jakasu.subscriber.examples.subscriber.TestFailureSubscriber
+    #      topic:
+    #        name: "Output-Topic"
+    #      groupid: "Jakasu_Test_01"
+    #      bootstrap-servers: yourhost:port
+
+    example3:
+      classname: com.americanexpress.jakasu.subscriber.examples.subscriber.TestSubscriber
+      groupid: "Jakasu_Test_01"
+      bootstrap-servers: yourhost:port
+      topic:
+        name: "abc_topic"
+      filter:
+        custom-classname: com.americanexpress.jakasu.subscriber.examples.ExampleCustomFilter
+
+  security:
+    enabled: true
+    protocol: SSL
+    ssl:
+      protocol: TLSv1.2
+      keystore:
+        type: JKS
+        location: jakasu-subscriber-examples/src/main/cert/appkeystore.jks
+        password: ENC(your-encrypted-appkeystore-password)
+      key:
+        password: ENC(your-encrypted-appkeystore-password)
+      truststore:
+        location: jakasu-subscriber-examples/src/main/cert/kafka-client-yourtruststore.jks
+        password: ENC(your-encrypted-client-keystore-store-password)
+
+jasypt: #jasypt include for secret encryption
+  encryptor:
+    password: ${symmetric_cipher_key}
